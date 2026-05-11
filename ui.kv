@@ -1,0 +1,22 @@
+<Root>:
+
+    orientation: "vertical"
+    padding: 20
+    spacing: 10
+
+    Label:
+        text: "🎮 PS3 TOOL"
+
+    Button:
+        text: "Analizar ISO"
+        size_hint_y: None
+        height: 60
+        on_press: root.analizar()
+
+    Label:
+        id: game_id
+        text: "ID: -"
+
+    Label:
+        id: fw
+        text: "Firmware: -"
