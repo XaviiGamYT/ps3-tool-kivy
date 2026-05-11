@@ -1,4 +1,4 @@
-name: Build Kivy APK (Docker)
+name: Build Kivy APK
 
 on:
   workflow_dispatch:
@@ -9,11 +9,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    # 🔹 Clonar repo
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Build APK using Buildozer Docker
+    # 🔹 Python estable
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    # 🔹 Dependencias del sistema
+    - name: Install system dependencies
       run: |
-        docker run --rm \
-        -v $PWD:/home/user/app \
-        kivy/buildozer buildozer android debug
+        sudo apt update
+        sudo apt install -y \
+          git zip unzip wget \
+          openjdk-17-jdk \
+          build-essential \
+          autoconf automake libtool pkg-config \
+          libffi-dev libssl-dev
+
+    # 🔹 Python tools
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install cython buildozer kivy
+
+    # 🔹 Inicializar Buildozer
+    - name: Init Buildozer
+      run: |
+        buildozer init || true
+
+    # 🔹 Build APK (SIN INTERACCIÓN)
+    - name: Build APK
+      run: |
+        export CI=1
+        export DEBIAN_FRONTEND=noninteractive
+
+        yes | buildozer -v android debug
