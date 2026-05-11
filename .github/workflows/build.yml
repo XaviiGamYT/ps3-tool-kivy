@@ -13,13 +13,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # 🔹 Python estable (IMPORTANTE: 3.10)
+    # 🔹 Python estable
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
 
-    # 🔹 Dependencias del sistema
+    # 🔹 Sistema base (Android + compilación)
     - name: Install system dependencies
       run: |
         sudo apt update
@@ -30,14 +30,19 @@ jobs:
           autoconf automake libtool pkg-config \
           libffi-dev libssl-dev
 
-    # 🔹 Python tools (VERSIÓN FIJA ESTABLE)
+    # 🔹 Python deps FIJAS (evita crashes p4a)
     - name: Install Python dependencies
       run: |
         pip install --upgrade pip
         pip install cython==0.29.36
+        pip install kivy==2.2.1
         pip install buildozer==1.5.0
         pip install python-for-android==2024.1.21
-        pip install kivy==2.2.1
+
+    # 🔹 Limpiar builds anteriores (MUY IMPORTANTE)
+    - name: Clean previous builds
+      run: |
+        rm -rf .buildozer
 
     # 🔹 Inicializar buildozer
     - name: Init Buildozer
