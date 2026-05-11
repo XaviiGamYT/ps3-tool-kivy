@@ -9,48 +9,59 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    # 1. Clonar repo
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Setup Python
+    # 2. Python correcto
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
 
-    - name: Install system deps
+    # 3. Dependencias del sistema
+    - name: Install system dependencies
       run: |
         sudo apt update
         sudo apt install -y \
-          git zip unzip openjdk-17-jdk \
+          git zip unzip wget \
+          openjdk-17-jdk \
           build-essential \
           autoconf automake libtool pkg-config \
           libffi-dev libssl-dev
 
-    - name: Install Android SDK tools
-      run: |
-        mkdir -p $HOME/android-sdk
-        cd $HOME/android-sdk
-
-        # instalar cmdline tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-        unzip commandlinetools-linux-*.zip
-
-        mkdir -p cmdline-tools/latest
-        mv cmdline-tools/* cmdline-tools/latest/
-
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" \
-                   "platforms;android-31" \
-                   "build-tools;31.0.0"
-
-    - name: Install Python deps
+    # 4. Instalar Python tools
+    - name: Install Python dependencies
       run: |
         pip install --upgrade pip
         pip install cython buildozer kivy
 
-    - name: Build APK
+    # 5. Android SDK (FIX REAL sin errores de carpeta)
+    - name: Install Android SDK
       run: |
+        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        mkdir -p $ANDROID_SDK_ROOT
+
+        cd $HOME
+
+        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+        unzip commandlinetools-linux-*.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+
+        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+
+        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+
+        yes | sdkmanager --licenses
+
+        sdkmanager \
+          "platform-tools" \
+          "platforms;android-31" \
+          "build-tools;31.0.0"
+
+    # 6. Build APK
+    - name: Build APK with Buildozer
+      run: |
+        buildozer init || true
         buildozer android debug
