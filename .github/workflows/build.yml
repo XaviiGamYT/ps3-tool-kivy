@@ -1,4 +1,4 @@
-name: Build Kivy APK
+name: Build Kivy APK Stable
 
 on:
   workflow_dispatch:
@@ -6,53 +6,37 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-    # 🔹 Clonar repo
-    - name: Checkout repository
+    - name: Checkout
       uses: actions/checkout@v3
 
-    # 🔹 Python estable
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
-
-    # 🔹 Sistema base (Android + compilación)
-    - name: Install system dependencies
+    - name: Install dependencies
       run: |
         sudo apt update
         sudo apt install -y \
           git zip unzip wget \
           openjdk-17-jdk \
           build-essential \
-          autoconf automake libtool pkg-config \
+          python3-pip \
           libffi-dev libssl-dev
 
-    # 🔹 Python deps FIJAS (evita crashes p4a)
-    - name: Install Python dependencies
+    - name: Install Buildozer stable stack
       run: |
         pip install --upgrade pip
         pip install cython==0.29.36
         pip install kivy==2.2.1
         pip install buildozer==1.5.0
-        pip install python-for-android==2024.1.21
+        pip install python-for-android==2023.9.16
 
-    # 🔹 Limpiar builds anteriores (MUY IMPORTANTE)
-    - name: Clean previous builds
+    - name: Clean
       run: |
         rm -rf .buildozer
 
-    # 🔹 Inicializar buildozer
-    - name: Init Buildozer
-      run: |
-        buildozer init || true
-
-    # 🔹 Build APK (SIN INTERACCIÓN)
     - name: Build APK
       run: |
         export CI=1
         export DEBIAN_FRONTEND=noninteractive
 
-        yes | buildozer -v android debug
+        yes | buildozer android debug
