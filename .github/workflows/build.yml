@@ -1,4 +1,4 @@
-name: Build Kivy APK Stable
+name: Build Kivy APK Stable Fix
 
 on:
   workflow_dispatch:
@@ -12,25 +12,31 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Install dependencies
+    - name: Setup Python 3.10 (CRÍTICO)
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install system deps
       run: |
         sudo apt update
         sudo apt install -y \
           git zip unzip wget \
           openjdk-17-jdk \
           build-essential \
-          python3-pip \
+          autoconf automake libtool pkg-config \
           libffi-dev libssl-dev
 
-    - name: Install Buildozer stable stack
+    - name: Install Python stack FIXED
       run: |
         pip install --upgrade pip
         pip install cython==0.29.36
+        pip install setuptools==68.0.0
         pip install kivy==2.2.1
         pip install buildozer==1.5.0
         pip install python-for-android==2023.9.16
 
-    - name: Clean
+    - name: Clean build
       run: |
         rm -rf .buildozer
 
@@ -39,4 +45,4 @@ jobs:
         export CI=1
         export DEBIAN_FRONTEND=noninteractive
 
-        yes | buildozer android debug
+        yes | buildozer -v android debug
